@@ -52,8 +52,6 @@ API_DRIVE = "drive"
 API_VERSION = "v3"
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
-# services = Create_Service(CLIENT_FILE_NAME, API_DRIVE, API_VERSION, SCOPES)
-
 app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
 app.add_middleware(
     CORSMiddleware,
@@ -70,7 +68,6 @@ async def is_login(request: AccountCheck):
     try:
         global services
         services, name = Create_Token_Drive(request.name)
-        print("Check here 7")
         if services:
             return {"message": "Successfully logged in", "data": name, "status":"success"}
         else:
@@ -79,61 +76,6 @@ async def is_login(request: AccountCheck):
         print(f"An error occurred: {e}")
         return {"message": "Failed to login", "data": False, "status":"failed"}
     
-
-# async def process_file(file):
-#     try:
-#         summerized_id = str(uuid.uuid4())
-#         file_contents = await file.read()
-#         path = f"./delete/{file.filename}"
-#         with open(path, "wb") as f:
-#             f.write(file_contents)
-#         text = extract_text_from_pdf(path)
-#         summary = Summerized_Text(text)
-#         report_id = AddReport(services, summerized_id, path)
-#         AddSummary(
-#             services,
-#             {
-#                 "id": summerized_id,
-#                 "project": "",
-#                 "summary": summary,
-#                 "drive": f"https://drive.google.com/file/d/{report_id}/view?usp=sharing",
-#                 "year": "2023",
-#                 "category": ["wanna check"],
-#             },
-#         )
-#         os.remove(path)
-#         return {
-#             "message": f"Successfully added Report and Summary for {file.filename}",
-#             "data": {
-#                 "id": summerized_id,
-#                 "compare": "",
-#                 "title": "",
-#                 "summary": summary,
-#                 "drive": f"https://drive.google.com/file/d/{report_id}/view?usp=sharing",
-#                 "year": "2023",
-#                 "category": ["wanna check"],
-#             },
-#             "success": True,
-#         }
-#     except Exception as e:
-#         return {
-#             "message": f"Error processing {file.filename}: {str(e)}",
-#             "status": "failed",
-#         }
-
-# @app.post("/api/upload")
-# async def upload_files(files: List[UploadFile] = File(...)):
-#     try:
-#         loop = asyncio.get_event_loop()
-#         with ThreadPoolExecutor() as pool:
-#             responses = await asyncio.gather(*[loop.run_in_executor(pool, process_file, file) for file in files])
-#         print("Uploaded Successfully")
-#         return {"data": responses,"status":"success"}
-#     except Exception as e:
-#         print(f"An error occurred: {str(e)}")
-#         return {"message": "Failed to login", "data": False, "status":"failed"}
-
-
 
 async def process_file(file):
     try:
@@ -288,7 +230,7 @@ async def checkExpired():
 
 
 @app.post("/api/New-Drive")
-async def NewDrive(oldName="", newName=""):
+async def NewDrive():
     try:
         Delete_Drive_Token()
         Create_Drive_Token()
@@ -299,9 +241,7 @@ async def NewDrive(oldName="", newName=""):
 
 
 if __name__ == "__main__":
-    # removeAccount()
     global services
-    # Delete_Drive_Token()
     Create_Drive_Token()
     uvicorn.run(app, host="0.0.0.0", port=8000)
 

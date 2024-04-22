@@ -38,8 +38,6 @@ def checkFake(service, path="root", Folder_Name="Fake"):
     if not fake_folder_id:
         fake_folder = service.files().create(body=file_metadata, fields="id").execute()
         fake_folder_id = fake_folder["id"]
-
-        # Create Result folder under Fake
         result_folder = (
             service.files()
             .create(

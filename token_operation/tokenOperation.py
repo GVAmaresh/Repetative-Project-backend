@@ -135,10 +135,8 @@ def Create_Token(name):
 # ///////////////////////////// FROM HERE IT STARTS //////////////////////////////////
 
 def Create_Token_Drive(name="current"):
-    print("newName = ",name)
     service = Create_Drive_Token()
     token_main_folder_id, token_folder_id = Check_Token_Main_Folder()
-    print("Check here 1")
     try:
         response = (
             service.files()
@@ -150,10 +148,8 @@ def Create_Token_Drive(name="current"):
             .execute()
         )
         list_all_files = response.get("files", [])  
-        print("list_all_files", list_all_files)
         is_selected = False
         file_name = ""
-        print("Check here 1")
         for list_files in list_all_files:
             print("List Files = ", list_files["name"])
             if list_files["name"].startswith("token_json"):
@@ -161,10 +157,8 @@ def Create_Token_Drive(name="current"):
                 existing_data = service.files().get_media(fileId=latest_file_id).execute()
                 if existing_data:  
                     existing_details = json.loads(existing_data.decode("utf-8"))
-                    print(existing_details)
                     with open(list_files["name"], "w", encoding="utf-8") as json_file:
                         json.dump(existing_details, json_file, ensure_ascii=False)
-                    print("Check here 3")
                     if existing_details.get(name):
                         is_selected = True
                         token_id = existing_details[name]["token_file_id"]
@@ -174,15 +168,11 @@ def Create_Token_Drive(name="current"):
                         with open(output, "rb") as cred:
                             creds = pickle.load(cred)
                             service = build(API_DRIVE, API_VERSION, credentials=creds)
-                        print("Check here 4")
                         os.remove(output)
-                        print("Check here 5")
-                        print(existing_details[name])
-                        print("Check here 6")
                         return service, existing_details[name]["token_name"]
                     
                     else:
-                        print("Check here 6")
+      
                         is_selected = True
                         token_file = Create_Token(name)
                         token_file_path = f'{name}.pickle' 
@@ -201,7 +191,6 @@ def Create_Token_Drive(name="current"):
                             "expires_at": expiry_time.strftime("%Y-%m-%dT%H:%M:%SZ")
                         }
                         file_name = list_files["name"] 
-                        print("Check here 7")
                         with open(file_name, "w", encoding="utf-8") as json_file:
                             json.dump(existing_details, json_file)
                         json_file.close()
@@ -215,16 +204,12 @@ def Create_Token_Drive(name="current"):
                         with open(output, "rb") as cred:
                             creds = pickle.load(cred)
                             service = build(API_DRIVE, API_VERSION, credentials=creds)
-                        print("Check here 8")
                         os.remove(output)
-                        print("Check here 9")
-                        print("2 = ",existing_details[name])
+                        os.remove(token_file_path)
                         return service, existing_details[name]["token_name"]
 
         if not is_selected:
-            print("Check here 10")
             token_file = Create_Token(name)
-            print("Check here 11")
             file_metadata = {"name": name, "parents": [token_folder_id]}
             token_file_path = f'{name}.pickle' 
             media = MediaFileUpload(token_file_path, mimetype="application/pdf")
@@ -234,7 +219,6 @@ def Create_Token_Drive(name="current"):
                 .create(body=file_metadata, media_body=media, fields="id")
                 .execute()
             )
-            print("Check here 12")
             token_id = newFile.get("id")
             expiry_time = datetime.now() + timedelta(hours=24)
             existing_details = {}
@@ -243,7 +227,6 @@ def Create_Token_Drive(name="current"):
                 "token_file_id": token_id,
                 "expires_at": expiry_time.strftime("%Y-%m-%dT%H:%M:%SZ")
             }
-            print("Check here 13")
             file_name = f"token_json.json"
             json_data = json.dumps(existing_details)
             with open(file_name, "w") as f:
@@ -252,11 +235,9 @@ def Create_Token_Drive(name="current"):
             media = MediaFileUpload(
                 file_name, mimetype="application/json", resumable=True
             )
-            print("Check here 14")
             service.files().create(
                 body=file_metadata, media_body=media, fields="id"
             ).execute()
-            print("Check here 15")
             token_id = existing_details[name]["token_file_id"]
             url = f"https://drive.google.com/file/d/{token_id}/view?usp=sharing"
             output = "current_token.pickle"
@@ -264,9 +245,8 @@ def Create_Token_Drive(name="current"):
 
             with open(output, "rb") as cred:
                 service = build(API_DRIVE, API_VERSION, credentials=cred)
-            print("Check here 16")
             os.remove(output)
-            print("3 = ",existing_details[name])
+            os.remove(file_name)
             return service, existing_details[name]["token_name"]
 
     except Exception as e:
