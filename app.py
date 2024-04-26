@@ -76,7 +76,7 @@ async def is_login(request: AccountCheck):
         print(f"An error occurred: {e}")
         return {"message": "Failed to login", "data": False, "status":"failed"}
     
-@app.get()
+@app.get("/api/check-working")
 def check_working():
     return {"message": "Message working Successfully",  "status":"success"}
 
